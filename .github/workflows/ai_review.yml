@@ -1,0 +1,90 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [master, main]
+
+jobs:
+  ai-code-review:
+    name: AI Code Review (Gemini)
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD > pr_diff.txt
+          cat pr_diff.txt
+          echo "diff_size=$(wc -c < pr_diff.txt)" >> $GITHUB_OUTPUT
+
+      - name: AI Code Review via Gemini API
+        if: always()
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          pip install -q google-genai
+          python3 << 'PYEOF'
+          import os
+          from google import genai
+
+          api_key = os.environ.get("GEMINI_API_KEY", "")
+          if not api_key:
+              print("GEMINI_API_KEY not set")
+              with open("review_comment.txt", "w") as f:
+                  f.write("⚠️ AI review skipped: GEMINI_API_KEY not configured.")
+              exit(0)
+
+          try:
+              with open("pr_diff.txt") as f:
+                  diff = f.read()[:8000]
+          except FileNotFoundError:
+              diff = "No diff available"
+
+          prompt = (
+              "Ты — senior Python разработчик. Проведи краткий code review следующего diff.\n"
+              "Формат ответа (на русском):\n"
+              "## 🤖 AI Code Review (Gemini)\n"
+              "### 🐛 Возможные баги\n"
+              "### 🔒 Безопасность\n"
+              "### ✅ Хорошие практики\n"
+              "### 📋 Итог\n\n"
+              "Diff:\n```\n" + diff + "\n```"
+          )
+
+          client = genai.Client(api_key=api_key)
+          response = client.models.generate_content(
+              model="gemini-2.5-flash",
+              contents=prompt,
+          )
+          review = response.text
+
+          with open("review_comment.txt", "w") as f:
+              f.write(review)
+              f.write("\n\n---\n*Автоматическое ревью от Google Gemini 2.5 Flash*")
+          PYEOF
+
+      - name: Post review comment to PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body;
+            try {
+              body = fs.readFileSync('review_comment.txt', 'utf8');
+            } catch (e) {
+              body = '⚠️ AI review результат недоступен.';
+            }
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body,
+            });
