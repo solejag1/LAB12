@@ -4,7 +4,7 @@
 
 **Студент:** Кучеров Олег  
 **Вариант:** 10 — Банковское приложение
-
+Средняя сложность
 [![CI](https://github.com/your-username/LAB12/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/LAB12/actions/workflows/ci.yml)
 
 ---
