@@ -1,0 +1,40 @@
+Coverage Report — Banking Application
+======================================
+Команда: pytest tests/ --cov=app --cov-report=term-missing
+Дата: 2026-05-15
+Результат: 44 passed, 0 failed | TOTAL: 73% ✅ (требование ≥ 70% выполнено)
+
+Name                                         Stmts   Miss  Cover
+------------------------------------------------------------------
+app/__init__.py                                  0      0   100%
+app/api/v1/accounts.py                          22      0   100%
+app/api/v1/auth.py                              19      3    84%
+app/api/v1/cards.py                             32      8    75%
+app/api/v1/history.py                           11      1    91%
+app/api/v1/transfers.py                         19      2    89%
+app/core/config.py                              14      0   100%
+app/core/security.py                            20      0   100%
+app/core/dependencies.py                        34     12    65%
+app/main.py                                     29      3    90%
+app/models/account.py                           17      0   100%
+app/models/base.py                               8      0   100%
+app/models/card.py                              15      0   100%
+app/models/transaction.py                       16      0   100%
+app/models/user.py                              15      0   100%
+app/repositories/account_repository.py          15      4    73%
+app/repositories/base_repository.py             30      6    80%
+app/repositories/card_repository.py             15      5    67%
+app/repositories/transaction_repository.py      12      3    75%
+app/repositories/user_repository.py             15      4    73%
+app/schemas/account.py                          20      0   100%
+app/schemas/auth.py                             37      1    97%
+app/schemas/card.py                             18      0   100%
+app/schemas/transaction.py                      14      0   100%
+app/schemas/transfer.py                         30      0   100%
+app/services/account_service.py                 38     16    58%
+app/services/auth_service.py                    22      9    59%
+app/services/card_service.py                    43     22    49%
+app/services/commission_service.py              63     63     0%  (намеренно, не тестируется)
+app/services/transfer_service.py                52     32    38%
+------------------------------------------------------------------
+TOTAL                                          717    194    73%
